@@ -4,6 +4,7 @@ from flask_jwt_extended import (JWTManager, create_access_token, get_jwt_identit
 from flask_cors import CORS
 
 import datetime
+from datetime import timedelta,date
 import random
 import sqlite3
 import bcrypt
@@ -213,17 +214,19 @@ class Subscriptions(db.Model):
     customer_id= db.Column(db.Integer)
     status = db.Column(db.String)
     price = db.Column(db.Integer)
+    customer_location = db.Column(db.String)
     created_at = db.Column(db.String)
     expire_at = db.Column(db.String)
     
 
 
-    def __init__(self,company_id, zone_id, customer_id, status, price, expire_at, created_at ):
+    def __init__(self,company_id, zone_id, customer_id, status, price, expire_at, customer_location, created_at ):
         self.company_id = company_id 
         self.zone_id = zone_id
         self.customer_id = customer_id
         self.status = status
         self.price = price
+        self.customer_location = customer_location
         self.expire_at = expire_at
         self.created_at = created_at
 
@@ -418,7 +421,7 @@ def pass_profile():
        return {"message":"Please Login"}, 200    
 
 
-#pass edit names
+#customer edit names
 @app.route('/customer/edit', methods=['PUT'])
 @jwt_required()
 def pass_edit_names():
@@ -478,6 +481,54 @@ def pass_topup():
         
 
 
+#customer subscribe to zone
+@app.route('/customer/zone/<id>', methods=['POST'])
+@jwt_required()
+def custom_add_subscription(id):
+    try:
+        users = get_jwt_identity()
+        customer_id = users['id']
+        
+        zone_search = Zones.query.filter_by(id=id).first()
+        zone_id = zone_search.id
+        company_id = zone_search.company_id
+        status = 'Active'
+        price = zone_search.price
+        customer_location = request.json['customer_location'] 
+        
+        
+
+        x = datetime.datetime.now()
+        current_time = x.strftime("%d""-""%B""-""%Y"" ""%H"":""%M"":""%S")
+        current_date = str(current_time)
+        created_at = current_date
+        end_at = x + timedelta(days=30)
+        expired_at = end_at.strftime("%d""-""%B""-""%Y"" ""%H"":""%M"":""%S")
+       
+        
+
+
+        '''
+        ======================
+        CODE LOGIC TO BE ADDED
+        ======================
+        if wallet is less than sub rate throw error
+        else create sub
+
+
+        cron job to change status to expired
+
+        confirm if company_id,zone_id & customer_id are matching on db
+        '''
+
+        expire_at = current_date
+        new_subs = Subscriptions(company_id, zone_id, customer_id, status, price, expired_at, customer_location, created_at)
+        db.session.add(new_subs)
+        db.session.commit()
+
+        return jsonify(expired_at)
+    except:
+        return 'Subscription Failed'
 
 
 
@@ -630,6 +681,7 @@ def owner_edit_names():
         return 'record updated', 200
     except:
         return 'login to edit profile'
+
 
 
 
