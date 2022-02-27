@@ -293,24 +293,7 @@ class Twilio(db.Model):
         self.auth_token = auth_token
 
 
-
-
-#=======================================#
-#   PASSANGER: 
-#             register ...|
-#             login ... |
-#             forget password ...|
-#             reset password ... |
-#             view profile ...|
-#             edit profile ... |
-#             pay ride ... |
-#             top up ride ... |
-#             view payments [7 days, 30 days, all] ...|
-#             view top ups [7 days, 30 days, all]  ...|
-#             view ride details, reg_no and sacco
-#             report matatu ... |
-#             view balance  ... |  
-#========================================#     
+   
 
 @app.route('/')
 def garbage_collection():
